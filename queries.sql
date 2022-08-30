@@ -71,51 +71,199 @@ SELECT UnitsInStock, UnitsOnOrder
 			ORDER BY UnitsInStock;
 
 
-/* contagem dos produtos*/
+/*11° contagem dos produtos*/
 SELECT count(*) as 'número total de produtos' FROM products;    
 
-/* mostra os compradores do Estado de São Paulo*/ 
+/*12° mostra os compradores do Estado de São Paulo*/ 
 SELECT *FROM customers c 
 	WHERE c.Region like 'SP';        
 
-/* MOstra o numero do pedido e a data que foi feito pelo cliente*/
+/*13° mostra o numero do pedido e a data que foi feito pelo cliente*/
 SELECT orders.OrderID, Customers.ContactName, orders.OrderDate
 	FROM orders
 		INNER JOIN customers ON Orders.CustomerID=Customers.CustomerID;
 
-/* quantidade de clientes por país*/
+/*14° quantidade de clientes por país*/
 SELECT COUNT(CustomerID) as 'qtde total por país', Country as 'país' FROM customers
 	GROUP BY Country
 		HAVING COUNT(CustomerID) 
 			ORDER BY COUNT(CustomerID) ASC;
 
-/* seleciona todos os produtos com valor entre 10 e 80 e ordena por preço do menor para o maior*/
+/*15° seleciona todos os produtos com valor entre 10 e 80 e ordena por preço do menor para o maior*/
 SELECT ProductName, UnitPrice  FROM products
 	WHERE UnitPrice BETWEEN 10 AND 80 order by UnitPrice ASC;
 
-/* média de preços dos produtos */
+/*16° média de preços dos produtos */
 SELECT AVG(UnitPrice) as 'Média de preço'
 	FROM products;
  
-/* seleciona todos os pedidos entre essas datas*/
+/*17° seleciona todos os pedidos entre essas datas*/
 SELECT * FROM orders
-WHERE OrderDate BETWEEN '1996-10-21' and '1997-11-26';
+	WHERE OrderDate BETWEEN '1996-10-21' and '1997-11-26';
 
-/*mostra os funcionários que moram no Reino Unido*/
+/*18° mostra os funcionários que moram no Reino Unido*/
 SELECT FirstName, Title, reportsTo, Extension, PostalCode FROM employees
 	WHERE Country IN
 (SELECT Country FROM employees
 	WHERE Country = 'UK');
 
-/* apresenta os funcionários que ganham menos de 2000 e os que ganham mais de 2800 */
+/*19° apresenta os funcionários que ganham menos de 2000 e os que ganham mais de 2800 */
 SELECT FirstName, Title, Salary FROM employees WHERE Salary < 2000
 	UNION ALL
 SELECT FirstName, Title, Salary FROM employees WHERE Salary > 2800
 	ORDER BY Salary;
 
-/* apresenta todos os produtos que contém entre 1 e 20 unidades no estoque e os que tem mais de 50 unidades,
+/*20° apresenta todos os produtos que contém entre 1 e 20 unidades no estoque e os que tem mais de 50 unidades,
 em ordem de quantidade */
 SELECT ProductName, ProductID,UnitsInStock FROM products WHERE UnitsInStock BETWEEN 1 AND 20
 	UNION ALL
 SELECT ProductName, ProductID,UnitsInStock FROM products WHERE UnitsInStock > 50
 	ORDER BY UnitsInStock;
+	
+/*21° Query: Seleciona a cidade e a empresa fornecedora dos produtos e os consumidores e fornecedores
+verificando e removendo as duplicadas*/
+CREATE VIEW `Fornecedores e Clientes por Cidade`
+	AS
+		SELECT City, CompanyName, ContactName,'Customers' AS Relationship 
+			FROM Customers
+	UNION
+		SELECT City, CompanyName, ContactName, 'Suppliers'
+			FROM Suppliers 
+	ORDER BY City;
+
+
+/*22° Query: Seleciona a cidade e a empresa fornecedora dos produtos e os consumidores e fornecedores
+verificando e removendo as duplicadas*/
+
+CREATE VIEW `Resumo de Vendas por Ano`
+AS
+SELECT
+   Orders.ShippedDate, 
+   Orders.OrderID, 
+   `Order Subtotals`.Subtotal
+FROM Orders 
+   INNER JOIN `Order Subtotals` ON Orders.OrderID = `Order Subtotals`.OrderID
+WHERE Orders.ShippedDate IS NOT NULL;
+
+
+/*23° Query: Seleciona a dados dos produtos e os respectivos compradores*/
+
+CREATE VIEW `Orders Qry`
+AS
+SELECT 
+   Orders.OrderID,
+   Orders.CustomerID,
+   Orders.EmployeeID, 
+   Orders.OrderDate, 
+   Orders.RequiredDate,
+   Orders.ShippedDate, 
+   Orders.ShipVia, 
+   Orders.Freight,
+   Orders.ShipName, 
+   Orders.ShipAddress, 
+   Orders.ShipCity,
+   Orders.ShipRegion,
+   Orders.ShipPostalCode,
+   Orders.ShipCountry,
+   Customers.CompanyName,
+   Customers.Address,
+   Customers.City,
+   Customers.Region,
+   Customers.PostalCode, 
+   Customers.Country
+FROM Customers 
+   JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+
+
+/*24° Query: Subtotal para cada pedido identificado por OrderID.
+Através de consulta simples usando GROUP BY para agregar dados para cada pedido.*/
+
+SELECT OrderID, 
+    FORMAT(sum(UnitPrice * Quantity * (1 - Discount)), 2) AS Subtotal
+		FROM order_details
+	GROUP by OrderID
+	ORDER by OrderID;
+
+
+/*25° Query: Selecção de produtos por ordem alfabetica*/
+
+SELECT distinct b.*, a.Category_Name
+	FROM Categories a 
+		INNER JOIN Products b ON a.Category_ID = b.Category_ID
+			WHERE b.Discontinued = 'N'
+	ORDER BY b.Product_Name;
+
+
+
+/*26° Query: Seleção de produtos com desconto aplicado*/
+
+SELECT DISTINCT y.OrderID, 
+    y.ProductID, 
+    x.ProductName, 
+    y.UnitPrice, 
+    y.Quantity, 
+    y.Discount, 
+    round(y.UnitPrice * y.Quantity * (1 - y.Discount), 2) AS ExtendedPrice
+	FROM Products x
+		INNER JOIN Order_Details y ON x.ProductID = y.ProductID
+	ORDER BY y.OrderID;
+
+
+/*27° Query: Seleção categoria, para obtenção de lista de produtos vendidos e o valor total das vendas.*/
+
+SELECT DISTINCT a.CategoryID, 
+    a.CategoryName,  
+    b.ProductName, 
+    SUM(round(y.UnitPrice * y.Quantity * (1 - y.Discount), 2)) AS ProductSales
+		FROM Order_Details y
+	INNER JOIN Orders d ON d.OrderID = y.OrderID
+	INNER JOIN Products b ON b.ProductID = y.ProductID
+	INNER JOIN Categories a ON a.CategoryID = b.CategoryID
+		WHERE d.OrderDate BETWEEN date('1997/1/1') AND date('1997/12/31')
+	GROUP BY a.CategoryID, a.CategoryName, b.ProductName
+	ORDER BY a.CategoryName, b.ProductName, ProductSales;
+
+
+/*28° Query: Quantidade de unidades em estoque por categoria e o local fornecedor,
+por meio de classificação/atribuição de continente*/
+
+SELECT c.CategoryName AS "Product Category", 
+       CASE WHEN s.Country IN 
+                 ('UK','Spain','Sweden','Germany','Norway',
+                  'Denmark','Netherlands','Finland','Italy','France')
+            THEN 'Europe'
+            WHEN s.Country IN ('USA','Canada','Brazil') 
+            THEN 'America'
+            ELSE 'Asia-Pacific'
+        END AS "Supplier Continent", 
+        SUM(p.UnitsInStock) AS UnitsInStock
+	FROM Suppliers s 
+	INNER JOIN Products p ON p.SupplierID=s.SupplierID
+	INNER JOIN Categories c ON c.CategoryID=p.CategoryID 
+	GROUP BY c.CategoryName, 
+    CASE WHEN s.Country in 
+                 ('UK','Spain','Sweden','Germany','Norway',
+                  'Denmark','Netherlands','Finland','Italy','France')
+              THEN 'Europe'
+              WHEN s.Country IN ('USA','Canada','Brazil') 
+              THEN 'America'
+              ELSE 'Asia-Pacific'
+	END;
+
+
+/*29° Query: Produtos acima do preço médio
+Emprego de subconsulta para obter um valor único (preço unitário médio)*/
+
+SELECT DISTINCT ProductName, UnitPrice
+	FROM Products
+	WHERE UnitPrice > (SELECT AVG(UnitPrice) FROM Products)
+	ORDER BY UnitPrice;
+
+
+/*30° Query: Valor das vendas, por funcionário discriminado pelo nome do país*/
+
+SELECT DISTINCT b.*, a.CategoryNamefrom Categories a 
+	INNER JOIN Products b ON a.CategoryID = b.CategoryIDwhere b.Discontinued = 'N'
+	ORDER BY b.ProductName;	
+	
+	
