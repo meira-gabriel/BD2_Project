@@ -69,3 +69,53 @@ SELECT UnitsInStock, UnitsOnOrder
 	FROM products
 		WHERE UnitsInStock BETWEEN 2 AND 10 
 			ORDER BY UnitsInStock;
+
+
+/* contagem dos produtos*/
+SELECT count(*) as 'número total de produtos' FROM products;    
+
+/* mostra os compradores do Estado de São Paulo*/ 
+SELECT *FROM customers c 
+	WHERE c.Region like 'SP';        
+
+/* MOstra o numero do pedido e a data que foi feito pelo cliente*/
+SELECT orders.OrderID, Customers.ContactName, orders.OrderDate
+	FROM orders
+		INNER JOIN customers ON Orders.CustomerID=Customers.CustomerID;
+
+/* quantidade de clientes por país*/
+SELECT COUNT(CustomerID) as 'qtde total por país', Country as 'país' FROM customers
+	GROUP BY Country
+		HAVING COUNT(CustomerID) 
+			ORDER BY COUNT(CustomerID) ASC;
+
+/* seleciona todos os produtos com valor entre 10 e 80 e ordena por preço do menor para o maior*/
+SELECT ProductName, UnitPrice  FROM products
+	WHERE UnitPrice BETWEEN 10 AND 80 order by UnitPrice ASC;
+
+/* média de preços dos produtos */
+SELECT AVG(UnitPrice) as 'Média de preço'
+	FROM products;
+ 
+/* seleciona todos os pedidos entre essas datas*/
+SELECT * FROM orders
+WHERE OrderDate BETWEEN '1996-10-21' and '1997-11-26';
+
+/*mostra os funcionários que moram no Reino Unido*/
+SELECT FirstName, Title, reportsTo, Extension, PostalCode FROM employees
+	WHERE Country IN
+(SELECT Country FROM employees
+	WHERE Country = 'UK');
+
+/* apresenta os funcionários que ganham menos de 2000 e os que ganham mais de 2800 */
+SELECT FirstName, Title, Salary FROM employees WHERE Salary < 2000
+	UNION ALL
+SELECT FirstName, Title, Salary FROM employees WHERE Salary > 2800
+	ORDER BY Salary;
+
+/* apresenta todos os produtos que contém entre 1 e 20 unidades no estoque e os que tem mais de 50 unidades,
+em ordem de quantidade */
+SELECT ProductName, ProductID,UnitsInStock FROM products WHERE UnitsInStock BETWEEN 1 AND 20
+	UNION ALL
+SELECT ProductName, ProductID,UnitsInStock FROM products WHERE UnitsInStock > 50
+	ORDER BY UnitsInStock;
