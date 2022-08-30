@@ -180,7 +180,7 @@ Através de consulta simples usando GROUP BY para agregar dados para cada pedido
 
 SELECT OrderID, 
     FORMAT(sum(UnitPrice * Quantity * (1 - Discount)), 2) AS Subtotal
-		FROM order_details
+		FROM orderdetails
 	GROUP by OrderID
 	ORDER by OrderID;
 
@@ -205,7 +205,7 @@ SELECT DISTINCT y.OrderID,
     y.Discount, 
     round(y.UnitPrice * y.Quantity * (1 - y.Discount), 2) AS ExtendedPrice
 	FROM Products x
-		INNER JOIN Order_Details y ON x.ProductID = y.ProductID
+		INNER JOIN orderdetails y ON x.ProductID = y.ProductID
 	ORDER BY y.OrderID;
 
 
@@ -215,7 +215,7 @@ SELECT DISTINCT a.CategoryID,
     a.CategoryName,  
     b.ProductName, 
     SUM(round(y.UnitPrice * y.Quantity * (1 - y.Discount), 2)) AS ProductSales
-		FROM Order_Details y
+		FROM orderdetails y
 	INNER JOIN Orders d ON d.OrderID = y.OrderID
 	INNER JOIN Products b ON b.ProductID = y.ProductID
 	INNER JOIN Categories a ON a.CategoryID = b.CategoryID
@@ -264,6 +264,4 @@ SELECT DISTINCT ProductName, UnitPrice
 
 SELECT DISTINCT b.*, a.CategoryNamefrom Categories a 
 	INNER JOIN Products b ON a.CategoryID = b.CategoryIDwhere b.Discontinued = 'N'
-	ORDER BY b.ProductName;	
-	
-	
+	ORDER BY b.ProductName;
