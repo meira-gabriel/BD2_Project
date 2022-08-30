@@ -122,9 +122,7 @@ SELECT ProductName, ProductID,UnitsInStock FROM products WHERE UnitsInStock > 50
 	
 /*21° Query: Seleciona a cidade e a empresa fornecedora dos produtos e os consumidores e fornecedores
 verificando e removendo as duplicadas*/
-CREATE VIEW `Fornecedores e Clientes por Cidade`
-	AS
-		SELECT City, CompanyName, ContactName,'Customers' AS Relationship 
+SELECT City, CompanyName, ContactName,'Customers' AS Relationship 
 			FROM Customers
 	UNION
 		SELECT City, CompanyName, ContactName, 'Suppliers'
@@ -134,9 +132,6 @@ CREATE VIEW `Fornecedores e Clientes por Cidade`
 
 /*22° Query: Seleciona a cidade e a empresa fornecedora dos produtos e os consumidores e fornecedores
 verificando e removendo as duplicadas*/
-
-CREATE VIEW `Resumo de Vendas por Ano`
-AS
 SELECT
    Orders.ShippedDate, 
    Orders.OrderID, 
@@ -147,9 +142,6 @@ WHERE Orders.ShippedDate IS NOT NULL;
 
 
 /*23° Query: Seleciona a dados dos produtos e os respectivos compradores*/
-
-CREATE VIEW `Ordens de Serviço`
-AS
 SELECT 
    Orders.OrderID,
    Orders.CustomerID,
@@ -187,11 +179,11 @@ SELECT OrderID,
 
 /*25° Query: Selecção de produtos por ordem alfabetica*/
 
-SELECT distinct b.*, a.Category_Name
+SELECT distinct b.*, a.CategoryName
 	FROM Categories a 
-		INNER JOIN Products b ON a.Category_ID = b.Category_ID
+		INNER JOIN Products b ON a.CategoryID = b.CategoryID
 			WHERE b.Discontinued = 'N'
-	ORDER BY b.Product_Name;
+	ORDER BY b.ProductName;
 
 
 
@@ -262,6 +254,6 @@ SELECT DISTINCT ProductName, UnitPrice
 
 /*30° Query: Valor das vendas, por funcionário discriminado pelo nome do país*/
 
-SELECT DISTINCT b.*, a.CategoryNamefrom Categories a 
-	INNER JOIN Products b ON a.CategoryID = b.CategoryIDwhere b.Discontinued = 'N'
+SELECT DISTINCT b.*, a.CategoryName from Categories a 
+	INNER JOIN Products b ON a.CategoryID = b.CategoryID where b.Discontinued = 'N'
 	ORDER BY b.ProductName;
