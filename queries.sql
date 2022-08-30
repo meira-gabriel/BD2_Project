@@ -148,7 +148,7 @@ WHERE Orders.ShippedDate IS NOT NULL;
 
 /*23° Query: Seleciona a dados dos produtos e os respectivos compradores*/
 
-CREATE VIEW `Orders Qry`
+CREATE VIEW `Ordens de Serviço`
 AS
 SELECT 
    Orders.OrderID,
